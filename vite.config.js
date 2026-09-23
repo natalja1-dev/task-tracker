@@ -5,4 +5,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   plugins: [react()],
   base: '/task-tracker/',
+  test: {
+    environment: 'jsdom',
+  },
 });
