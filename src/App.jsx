@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes } from 'react-router';
 import Header from './components/Header.jsx';
-import { TaskCard } from './components/TaskCard.jsx';
 import { TaskDetails } from './components/TaskDetails.jsx';
 import { TaskForm } from './components/TaskForm.jsx';
 import { getTasks } from './services/taskApi.js';
+import { PageSection } from './components/PageSection.jsx';
+import { TaskList } from './components/TaskList.jsx';
 import './App.css';
 
 export default function App() {
@@ -92,7 +93,7 @@ export default function App() {
         <Route
           path="/tasks"
           element={
-            <>
+            <PageSection title="My tasks">
               <TaskForm onAddTask={handleAddTask} />
 
               <div aria-label="Filter tasks">
@@ -107,23 +108,14 @@ export default function App() {
                 </button>
               </div>
 
-              {loading ? (
-                <p>Loading tasks...</p>
-              ) : error ? (
-                <p role="alert">Could not load tasks: {error}</p>
-              ) : visibleTasks.length === 0 ? (
-                <p>No tasks found</p>
-              ) : (
-                visibleTasks.map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onToggle={handleToggle}
-                    onDelete={handleDelete}
-                  />
-                ))
-              )}
-            </>
+              <TaskList
+                tasks={visibleTasks}
+                loading={loading}
+                error={error}
+                onToggle={handleToggle}
+                onDelete={handleDelete}
+              />
+            </PageSection>
           }
         />
 
