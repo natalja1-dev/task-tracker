@@ -1,9 +1,7 @@
-import { afterEach, expect, test, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { TaskCard } from './TaskCard.jsx';
-
-afterEach(cleanup);
 
 const task = {
   id: 2,
@@ -11,29 +9,31 @@ const task = {
   completed: false,
 };
 
-function renderTaskCard(onToggle = vi.fn()) {
+function renderTaskCard(onDelete = vi.fn()) {
   render(
     <MemoryRouter>
-      <TaskCard task={task} onToggle={onToggle} onDelete={vi.fn()} />
+      <TaskCard task={task} onToggle={vi.fn()} onDelete={onDelete} />
     </MemoryRouter>,
   );
-
-  return onToggle;
 }
 
-test('displays the supplied task title', () => {
-  renderTaskCard();
-
-  expect(
-    screen.getByRole('link', { name: 'Practise React state' }),
-  ).toBeTruthy();
+afterEach(() => {
+  cleanup();
 });
 
-test('calls onToggle with the task ID when clicked', () => {
-  const onToggle = renderTaskCard();
+describe('TaskCard', () => {
+  test('displays the supplied task title', () => {
+    renderTaskCard();
 
-  fireEvent.click(screen.getByRole('button', { name: 'Toggle completion' }));
+    expect(screen.getByText('Practise React state')).toBeTruthy();
+  });
 
-  expect(onToggle).toHaveBeenCalledOnce();
-  expect(onToggle).toHaveBeenCalledWith(2);
+  test('calls onDelete with the task ID when Delete is clicked', () => {
+    const onDelete = vi.fn();
+    renderTaskCard(onDelete);
+
+    fireEvent.click(screen.getByRole('button', { name: /delete/i }));
+
+    expect(onDelete).toHaveBeenCalledExactlyOnceWith(2);
+  });
 });

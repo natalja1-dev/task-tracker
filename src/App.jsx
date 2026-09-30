@@ -3,16 +3,36 @@ import { Link, NavLink, Route, Routes } from 'react-router';
 import Header from './components/Header.jsx';
 import { TaskDetails } from './components/TaskDetails.jsx';
 import { TaskForm } from './components/TaskForm.jsx';
-import { getTasks } from './services/taskApi.js';
+import { createTask, getTasks } from './services/taskApi.js';
 import { PageSection } from './components/PageSection.jsx';
 import { TaskList } from './components/TaskList.jsx';
 import './App.css';
 
+const FILTER_KEY = 'task-tracker-filter';
+const validFilters = ['all', 'completed', 'incomplete'];
+
+function getInitialFilter() {
+  try {
+    const savedFilter = localStorage.getItem(FILTER_KEY);
+    return validFilters.includes(savedFilter) ? savedFilter : 'all';
+  } catch {
+    return 'all';
+  }
+}
+
 export default function App() {
   const [tasks, setTasks] = useState([]);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState(getInitialFilter);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(FILTER_KEY, filter);
+    } catch {
+      // Filtreerimine töötab kui brauseris ei saa salvestada
+    }
+  }, [filter]);
 
   useEffect(() => {
     let ignore = false;
@@ -51,11 +71,14 @@ export default function App() {
     );
   }
 
-  function handleAddTask(title) {
-    setTasks((previousTasks) => {
-      const nextId = Math.max(0, ...previousTasks.map((task) => task.id)) + 1;
-      return [...previousTasks, { id: nextId, title, completed: false }];
-    });
+  async function handleAddTask(title) {
+    try {
+      const createdTask = await createTask(title);
+      setTasks((previousTasks) => [...previousTasks, createdTask]);
+      setError('');
+    } catch (addError) {
+      setError(addError.message);
+    }
   }
 
   function handleDelete(id) {
